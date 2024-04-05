@@ -17,10 +17,19 @@ services:
     build: book_game_api
     container_name: book_game_api
     restart: always
+    ports:
+      - "3000:3000"
     networks:
       - db_network
     depends_on:
       - db
+
+  web:
+    build: book_game
+    container_name: book_game_web
+    restart: always
+    ports:
+      - "9090:80"
 
 volumes:
   db_data:
