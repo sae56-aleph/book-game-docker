@@ -30,9 +30,33 @@ services:
     restart: always
     ports:
       - "9090:80"
+    volumes:
+      - audio_data:/usr/share/nginx/html/audio
+
+  tts:
+    image: synesthesiam/marytts:5.2
+    container_name: tts
+    restart: always
+    command: --voice upmc-pierre-hsmm
+    networks:
+      - audio_network
+
+  speech:
+    build: book_game_tts
+    container_name: book_game_tts
+    depends_on:
+      - db
+      - tts
+    networks:
+      - db_network
+      - audio_network
+    volumes:
+      - audio_data:/app/out
 
 volumes:
   db_data:
+  audio_data:
 
 networks:
   db_network:
+  audio_network:
