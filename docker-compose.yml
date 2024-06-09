@@ -1,4 +1,11 @@
 services:
+  cache:
+    image: redis:7
+    container_name: book_game_cache
+    restart: always
+    networks:
+      - cache_network
+
   db:
     image: postgres:16.2
     container_name: book_game_db
@@ -21,8 +28,11 @@ services:
       - "3000:3000"
     networks:
       - db_network
+      - cache_network
+      - audio_network
     depends_on:
       - db
+      - cache
 
   web:
     build: book_game
@@ -30,28 +40,28 @@ services:
     restart: always
     ports:
       - "9090:80"
-    volumes:
-      - audio_data:/usr/share/nginx/html/audio
 
   tts:
     image: synesthesiam/marytts:5.2
-    container_name: tts
+    container_name: book_game_tts
     restart: always
     command: --voice upmc-pierre-hsmm
     networks:
       - audio_network
-
-  speech:
-    build: book_game_tts
-    container_name: book_game_tts
-    depends_on:
-      - db
-      - tts
-    networks:
-      - db_network
-      - audio_network
     volumes:
       - audio_data:/app/out
+
+  # speech:
+  #   build: book_game_tts
+  #   container_name: book_game_tts
+  #   depends_on:
+  #     - db
+  #     - tts
+  #   networks:
+  #     - db_network
+  #     - audio_network
+  #   volumes:
+  #     - audio_data:/app/out
 
 volumes:
   db_data:
@@ -60,3 +70,4 @@ volumes:
 networks:
   db_network:
   audio_network:
+  cache_network:
